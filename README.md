@@ -1,6 +1,18 @@
 # Any.do One-Time Export
 
-This project exports your current Any.do data to JSON files for migration to another system.
+This tool reads a Playwright storage-state export from your own authenticated browser session and converts current Any.do data into JSON files for migration to another system.
+
+## Unofficial Project
+
+This project is unofficial and is not affiliated with, endorsed by, or supported by Any.do.
+
+## Usage Responsibility
+
+Use this tool only for exporting your own data and only if your use complies with Any.do's terms and all applicable laws.
+
+## Why This Exists
+
+This project exists to provide a small, practical, one-time export path for personal data portability when an official export flow is unavailable or insufficient.
 
 ## Disclaimer
 
@@ -24,6 +36,14 @@ The exporter redacts sensitive auth-like fields in output (keys containing:
 - `idSalt`
 
 Redacted values are replaced with `"[REDACTED]"`.
+
+Redaction is best-effort only. Exported files may still contain sensitive personal or account-related data (for example: task content, notes, participant information, location metadata, and other fields outside current redaction rules). Review output files carefully before sharing them with other people, tools, or AI systems.
+
+## Tested With
+
+- Any.do web at `https://app.any.do` (observed March 2026)
+- Playwright `storageState({ indexedDB: true })`
+- Python `3.14.3`
 
 ## Prerequisite Input
 
@@ -64,6 +84,39 @@ python3 flatten_anydo_export.py
 ```
 
 This creates `anydo_export_flat.json` with list names resolved on each task and simplified task fields for downstream AI import.
+
+## Example Output (Summary)
+
+Example output from `python3 export_anydo.py`:
+
+```json
+{
+  "database": "anydo-sync-db",
+  "taskCounts": {
+    "all": 115,
+    "completed": 77,
+    "active": 38
+  }
+}
+```
+
+## JSON Shape (Flat Export)
+
+Top-level keys in `anydo_export_flat.json`:
+
+- `exportedAt`
+- `source`
+- `taskCounts`
+- `lists`
+- `tags`
+- `labels`
+- `tasks`
+
+## Known Limitations
+
+- Schema-dependent: Any.do IndexedDB structure may change and break decoding.
+- Best-effort redaction: output is not guaranteed safe for public sharing.
+- Single-user utility: no multi-account orchestration or long-term maintenance guarantees.
 
 ## Optional Cleanup
 
