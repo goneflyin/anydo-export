@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -77,11 +78,45 @@ def redact_sensitive_fields(node):
     return node
 
 
-def main():
-    if not INPUT_FILE.exists():
-        raise RuntimeError(f"Missing input file: {INPUT_FILE}")
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Convert Any.do Playwright storage state into JSON export files."
+    )
+    parser.add_argument(
+        "input_file",
+        nargs="?",
+        default=str(INPUT_FILE),
+        help="Path to Playwright storage state JSON (default: anydo_storage_state.json)",
+    )
+    parser.add_argument(
+        "--output-full",
+        default=str(OUTPUT_FULL),
+        help="Full export output path (default: anydo_export.json)",
+    )
+    parser.add_argument(
+        "--output-completed",
+        default=str(OUTPUT_COMPLETED),
+        help="Completed tasks output path (default: anydo_completed_tasks.json)",
+    )
+    parser.add_argument(
+        "--output-summary",
+        default=str(OUTPUT_SUMMARY),
+        help="Summary output path (default: anydo_export_summary.json)",
+    )
+    return parser.parse_args()
 
-    storage_state = json.loads(INPUT_FILE.read_text())
+
+def main():
+    args = parse_args()
+    input_file = Path(args.input_file)
+    output_full = Path(args.output_full)
+    output_completed = Path(args.output_completed)
+    output_summary = Path(args.output_summary)
+
+    if not input_file.exists():
+        raise RuntimeError(f"Missing input file: {input_file}")
+
+    storage_state = json.loads(input_file.read_text())
     anydo_origin = load_anydo_origin(storage_state)
     sync_db = load_anydo_sync_db(anydo_origin)
 
@@ -128,15 +163,15 @@ def main():
         "storeCounts": store_counts,
         "taskCounts": export_payload["taskCounts"],
         "outputFiles": [
-            str(OUTPUT_FULL),
-            str(OUTPUT_COMPLETED),
-            str(OUTPUT_SUMMARY),
+            str(output_full),
+            str(output_completed),
+            str(output_summary),
         ],
     }
 
-    OUTPUT_FULL.write_text(json.dumps(export_payload, indent=2, ensure_ascii=False))
-    OUTPUT_COMPLETED.write_text(json.dumps(completed_payload, indent=2, ensure_ascii=False))
-    OUTPUT_SUMMARY.write_text(json.dumps(summary_payload, indent=2, ensure_ascii=False))
+    output_full.write_text(json.dumps(export_payload, indent=2, ensure_ascii=False))
+    output_completed.write_text(json.dumps(completed_payload, indent=2, ensure_ascii=False))
+    output_summary.write_text(json.dumps(summary_payload, indent=2, ensure_ascii=False))
 
     print(json.dumps(summary_payload, indent=2, ensure_ascii=False))
 

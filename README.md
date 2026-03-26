@@ -14,6 +14,21 @@ Use this tool only for exporting your own data and only if your use complies wit
 
 This project exists to provide a small, practical, one-time export path for personal data portability when an official export flow is unavailable or insufficient.
 
+## Purpose
+
+Use this tool to:
+
+- Back up your own tasks
+- Analyze your data
+- Migrate to another system
+- Create AI-friendly structured exports
+
+## How It Works
+
+This project reads a Playwright `storageState` export (with IndexedDB included) from your own authenticated browser session and converts it to structured JSON.
+
+It does not bypass login, call private APIs directly, modify your Any.do account, or automate task changes.
+
 ## Disclaimer
 
 This code is offered as a convenience and as an example for others.
@@ -45,6 +60,11 @@ Redaction is best-effort only. Exported files may still contain sensitive person
 - Playwright `storageState({ indexedDB: true })`
 - Python `3.14.3`
 
+## Requirements
+
+- Python `3.9+`
+- A Playwright storage-state file with IndexedDB included
+
 ## Prerequisite Input
 
 The script expects a Playwright storage-state file at:
@@ -75,12 +95,24 @@ From this directory:
 python3 export_anydo.py
 ```
 
+Or with a custom input/output path:
+
+```bash
+python3 export_anydo.py anydo-state.json --output-full anydo_export.json --output-completed anydo_completed_tasks.json --output-summary anydo_export_summary.json
+```
+
 ## Generate Flat AI-Friendly Export
 
 After `anydo_export.json` exists, run:
 
 ```bash
 python3 flatten_anydo_export.py
+```
+
+Or with custom input/output files:
+
+```bash
+python3 flatten_anydo_export.py anydo_export.json --output anydo_export_flat.json
 ```
 
 This creates `anydo_export_flat.json` with list names resolved on each task and simplified task fields for downstream AI import.
@@ -117,6 +149,14 @@ Top-level keys in `anydo_export_flat.json`:
 - Schema-dependent: Any.do IndexedDB structure may change and break decoding.
 - Best-effort redaction: output is not guaranteed safe for public sharing.
 - Single-user utility: no multi-account orchestration or long-term maintenance guarantees.
+
+## Technical Notes
+
+Data flow is:
+
+1. IndexedDB records in Playwright storage state
+2. Decode encoded key/value structures
+3. Emit full and flat JSON exports
 
 ## Optional Cleanup
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import json
 from pathlib import Path
 
@@ -118,14 +119,36 @@ def build_flat_export(data):
     }
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Create a normalized flat Any.do export from anydo_export.json."
+    )
+    parser.add_argument(
+        "input_file",
+        nargs="?",
+        default=str(INPUT_FILE),
+        help="Path to export_anydo output JSON (default: anydo_export.json)",
+    )
+    parser.add_argument(
+        "--output",
+        default=str(OUTPUT_FILE),
+        help="Flat export output path (default: anydo_export_flat.json)",
+    )
+    return parser.parse_args()
+
+
 def main():
-    data = load_json(INPUT_FILE)
+    args = parse_args()
+    input_file = Path(args.input_file)
+    output_file = Path(args.output)
+
+    data = load_json(input_file)
     flat = build_flat_export(data)
-    OUTPUT_FILE.write_text(json.dumps(flat, indent=2, ensure_ascii=False))
+    output_file.write_text(json.dumps(flat, indent=2, ensure_ascii=False))
     print(
         json.dumps(
             {
-                "output": str(OUTPUT_FILE),
+                "output": str(output_file),
                 "tasks": flat["taskCounts"],
                 "lists": len(flat["lists"]),
                 "tags": len(flat["tags"]),
