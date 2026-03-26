@@ -1,0 +1,8 @@
+# Generated export artifacts
+anydo_export.json
+anydo_export_flat.json
+anydo_completed_tasks.json
+anydo_export_summary.json
+anydo_storage_state.json
+network-log.txt
+*.tmp
